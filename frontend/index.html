@@ -1,0 +1,1572 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101d2b">
+    <title>YAZD TIRE GAME CLUB</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #101d2b;
+            color: white;
+            font-family: Tahoma, Arial, sans-serif;
+            min-height: 100vh;
+        }
+
+        #app {
+            display: flex;
+            visibility: hidden;
+            width: 100%;
+            min-height: 100vh;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        header {
+            width: 100%;
+            max-width: 960px;
+            text-align: center;
+            padding: 8px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: clamp(20px, 4vw, 30px);
+            color: #ff9f1c;
+            direction: ltr;
+        }
+
+        header p {
+            margin: 8px 0;
+            color: #cbd5e1;
+            font-size: 13px;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 960px;
+            overflow: hidden;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            background: #172b3e;
+        }
+
+        #game-container canvas {
+            display: block;
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        footer {
+            padding: 10px;
+            color: #94a3b8;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        /* LOGIN SCREEN */
+
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 20px 0 0;
+            overflow-y: auto;
+            background:
+                linear-gradient(
+                    to bottom,
+                    rgba(8, 20, 33, 0.02) 0%,
+                    rgba(8, 20, 33, 0.05) 42%,
+                    rgba(8, 20, 33, 0.65) 58%,
+                    rgba(8, 20, 33, 0.95) 100%
+                ),
+                url("/assets/login-bg.png");
+            background-size: cover;
+            background-position: center top;
+            background-repeat: no-repeat;
+        }
+
+        /* AUTOMATIC IMAGE SLIDESHOW */
+
+        #login-slideshow {
+            position: fixed;
+            z-index: 10001;
+            width: min(420px, 30vw);
+            height: 320px;
+            top: calc(50% + 2cm);
+            left: calc(50% - 350px);
+            transform: translate(-50%, -50%);
+            margin: 0;
+            overflow: hidden;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.22);
+            background: transparent;
+        }
+
+        #login-slideshow img {
+            position: absolute;
+            inset: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain !important;
+            object-position: center center;
+            background: transparent;
+            opacity: 0;
+            transition: opacity 1.4s ease-in-out;
+        }
+
+        #login-slideshow img.active {
+            opacity: 1;
+        }
+
+        /* PRODUCT CATALOG */
+
+        #product-showcase {
+            position: fixed;
+            z-index: 10002;
+            width: 244px;
+            height: 244px;
+            top: calc(50% + 2cm);
+            left: calc(50% + 350px);
+            transform: translate(-50%, -50%);
+            overflow: hidden;
+            border: 1px solid rgba(255,159,28,0.65);
+            border-radius: 18px;
+            background: linear-gradient(
+                145deg,
+                rgba(20, 43, 62, 0.97),
+                rgba(7, 19, 31, 0.97)
+            );
+            box-shadow:
+                0 15px 45px rgba(0,0,0,0.4),
+                0 0 25px rgba(255,159,28,0.10);
+            direction: rtl;
+        }
+
+        .catalog-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .catalog-image-area {
+            position: relative;
+            width: 160px;
+            height: 145px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 7px;
+        }
+
+        #product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        #tire-placeholder {
+            width: 115px;
+            height: 115px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: repeating-conic-gradient(
+                #15191d 0deg 8deg,
+                #303942 8deg 12deg
+            );
+            border: 9px solid #080b0f;
+            box-shadow:
+                inset 0 0 0 5px #505b66,
+                inset 0 0 0 16px #101820,
+                0 7px 15px rgba(0,0,0,0.4);
+        }
+
+        #tire-placeholder::after {
+            content: "";
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #aab5bf;
+            border: 6px solid #364451;
+            box-shadow: inset 0 0 0 4px #d8e0e8;
+        }
+
+        #product-name {
+            margin: 2px 0 7px;
+            color: #ff9f1c;
+            font-size: 22px;
+            font-weight: bold;
+            direction: ltr;
+            letter-spacing: 1px;
+        }
+
+        #product-size {
+            margin: 0;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: bold;
+            direction: ltr;
+            letter-spacing: 1px;
+        }
+
+        .catalog-footer {
+            position: absolute;
+            bottom: 7px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .catalog-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #64748b;
+            transition: 0.3s;
+        }
+
+        .catalog-dot.active {
+            width: 20px;
+            border-radius: 10px;
+            background: #ff9f1c;
+        }
+
+        /* LOGIN CARD */
+
+        .login-card {
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
+            width: 100%;
+            max-width: 100%;
+            min-height: 50vh;
+            padding: 22px 26px 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 25px 25px 0 0;
+            background: rgba(10, 25, 40, 0.94);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 -10px 45px rgba(0,0,0,0.4);
+        }
+
+        .logo {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            background: #ff9f1c;
+            color: #101d2b;
+            font-size: 23px;
+            font-weight: bold;
+            direction: ltr;
+        }
+
+        .login-card h1 {
+            margin: 0;
+            color: #ff9f1c;
+            font-size: 22px;
+            text-align: center;
+            direction: ltr;
+        }
+
+        .login-card .subtitle {
+            margin: 8px 0 18px;
+            color: #cbd5e1;
+            text-align: center;
+            font-size: 13px;
+            line-height: 1.9;
+        }
+
+        #login-music-button {
+            display: block;
+            width: 100%;
+            max-width: 260px;
+            height: 42px;
+            margin: 0 auto 18px;
+            border: 1px solid rgba(255,159,28,0.6);
+            border-radius: 9px;
+            background: rgba(255,159,28,0.12);
+            color: #ffbd66;
+            font-family: Tahoma, Arial, sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        #login-music-button:hover {
+            background: rgba(255,159,28,0.24);
+        }
+
+        .field {
+            margin-bottom: 13px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 7px;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .field input {
+            width: 100%;
+            height: 48px;
+            padding: 0 14px;
+            border: 1px solid #475569;
+            border-radius: 10px;
+            outline: none;
+            background: rgba(16, 29, 43, 0.95);
+            color: white;
+            font-size: 16px;
+            font-family: Tahoma, Arial, sans-serif;
+        }
+
+        .field input:focus {
+            border-color: #ff9f1c;
+            box-shadow: 0 0 0 2px rgba(255,159,28,0.18);
+        }
+
+        .field input::placeholder {
+            color: #718096;
+        }
+
+        #login-button {
+            width: 100%;
+            height: 50px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 10px;
+            background: #ff9f1c;
+            color: #101d2b;
+            font-family: Tahoma, Arial, sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #login-button:hover {
+            background: #ffb347;
+        }
+
+        #login-button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        #login-error {
+            display: none;
+            margin-top: 14px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #7f1d1d;
+            color: #fecaca;
+            font-size: 13px;
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        #employee-info {
+            display: none;
+            width: 100%;
+            max-width: 960px;
+            margin: 5px auto 10px;
+            padding: 12px 16px;
+            border: 1px solid #40546b;
+            border-radius: 10px;
+            background: #172b3e;
+            color: #e2e8f0;
+            font-size: 13px;
+        }
+
+        #logout-button {
+            float: left;
+            padding: 6px 12px;
+            border: 1px solid #64748b;
+            border-radius: 7px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+        }
+
+        #logout-button:hover {
+            background: #334155;
+        }
+
+        /* MUSIC SEEK CONTROLS */
+
+        #music-seek-container {
+            width: 100%;
+            max-width: 340px;
+            margin: -8px auto 18px;
+            padding: 12px 15px;
+            border: 1px solid rgba(255,159,28,0.25);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.045);
+        }
+
+        .music-time-row {
+            display: flex;
+            justify-content: space-between;
+            direction: ltr;
+            color: #cbd5e1;
+            font-size: 11px;
+            margin-bottom: 8px;
+            font-family: Arial, sans-serif;
+        }
+
+        #music-seekbar {
+            display: block;
+            width: 100%;
+            height: 6px;
+            margin: 0;
+            border-radius: 10px;
+            outline: none;
+            cursor: pointer;
+            accent-color: #ff9f1c;
+            direction: ltr;
+        }
+
+        .music-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+            direction: ltr;
+        }
+
+        .music-controls button {
+            min-width: 65px;
+            height: 32px;
+            border: 1px solid rgba(255,159,28,0.4);
+            border-radius: 8px;
+            background: rgba(255,159,28,0.12);
+            color: #ffbd66;
+            font-family: Tahoma, Arial, sans-serif;
+            cursor: pointer;
+        }
+
+        .music-controls button:hover {
+            background: rgba(255,159,28,0.3);
+        }
+
+        #music-status {
+            color: #94a3b8;
+            font-size: 11px;
+            direction: rtl;
+        }
+
+        /* MEDIUM SCREENS */
+
+        @media (max-width: 1100px) and (min-width: 601px) {
+            #login-slideshow {
+                width: 280px;
+                height: 280px;
+                top: calc(50% + 2cm);
+                left: calc(50% - 180px);
+            }
+
+            #product-showcase {
+                width: 204px;
+                height: 204px;
+                left: calc(50% + 180px);
+            }
+
+            .catalog-content {
+                padding: 8px;
+            }
+
+            .catalog-image-area {
+                width: 125px;
+                height: 110px;
+            }
+
+            #tire-placeholder {
+                width: 90px;
+                height: 90px;
+            }
+
+            #product-name {
+                font-size: 19px;
+            }
+
+            #product-size {
+                font-size: 15px;
+            }
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 600px) {
+            #login-screen {
+                justify-content: flex-start;
+                padding-top: 12px;
+                padding-bottom: 0;
+            }
+
+            #login-slideshow,
+            #product-showcase {
+                position: relative;
+                top: auto;
+                left: auto;
+                transform: none;
+                flex-shrink: 0;
+                margin: 8px auto;
+            }
+
+            #login-slideshow {
+                width: min(90vw, 300px);
+                height: min(90vw, 300px);
+            }
+
+            #product-showcase {
+                width: min(90vw, 244px);
+                height: min(90vw, 244px);
+            }
+
+            .catalog-content {
+                height: 100%;
+            }
+
+            .catalog-image-area {
+                width: 160px;
+                height: 145px;
+            }
+
+            #tire-placeholder {
+                width: 115px;
+                height: 115px;
+            }
+
+            .login-card {
+                width: 100%;
+                min-height: auto;
+                margin-top: 12px;
+                padding: 18px 20px 25px;
+            }
+
+            .login-card h1 {
+                font-size: 20px;
+            }
+
+            #music-seek-container {
+                max-width: 100%;
+            }
+        }
+
+        /* SHORT SCREENS */
+
+        @media (max-height: 600px) and (min-width: 601px) {
+            #login-screen {
+                justify-content: flex-end;
+                overflow-y: auto;
+            }
+
+            #login-slideshow {
+                top: calc(35% + 2cm);
+                width: 230px;
+                height: 230px;
+                left: calc(50% - 150px);
+            }
+
+            #product-showcase {
+                top: calc(35% + 2cm);
+                width: 204px;
+                height: 204px;
+                left: calc(50% + 150px);
+            }
+
+            .catalog-image-area {
+                width: 120px;
+                height: 105px;
+            }
+
+            #tire-placeholder {
+                width: 85px;
+                height: 85px;
+            }
+
+            #product-name {
+                font-size: 17px;
+            }
+
+            #product-size {
+                font-size: 15px;
+            }
+
+            .login-card {
+                min-height: auto;
+                padding: 12px 20px;
+            }
+
+            .logo {
+                width: 42px;
+                height: 42px;
+                margin-bottom: 6px;
+            }
+
+            .login-card .subtitle {
+                margin: 5px 0 10px;
+            }
+
+            #login-music-button {
+                margin-bottom: 10px;
+            }
+
+            .field {
+                margin-bottom: 8px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #login-slideshow img {
+                transition-duration: 0.2s;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <audio
+        id="login-music"
+        src="/assets/login-music.mp3"
+        preload="auto"
+        loop>
+    </audio>
+
+    <div id="login-screen">
+
+        <div id="login-slideshow" aria-label="تصاویر باشگاه یزد تایر">
+            <img id="slide-a" class="active" src="/assets/slide1.png" alt="تصویر باشگاه یزد تایر">
+            <img id="slide-b" src="/assets/slide2.png" alt="تصویر باشگاه یزد تایر">
+        </div>
+
+        <section id="product-showcase" aria-label="محصولات تایر سواری">
+            <div class="catalog-content">
+                <div class="catalog-image-area">
+                    <img
+                        id="product-image"
+                        src="https://yric.com/wp-content/uploads/2025/10/Tire-Nova-18565-R15-Front-1024x1024.webp"
+                        alt="تایر سواری یزد تایر">
+                    <div id="tire-placeholder"></div>
+                </div>
+
+                <h3 id="product-name">NOVA</h3>
+                <p id="product-size">185/65 R14</p>
+            </div>
+
+            <div class="catalog-footer" id="catalog-dots"></div>
+        </section>
+
+        <div class="login-card">
+            <div class="logo">YT</div>
+
+            <h1>YAZD TIRE</h1>
+
+            <p class="subtitle">
+                باشگاه بازی و رقابت کارکنان یزد تایر
+                <br>
+                برای ورود، اطلاعات پرسنلی خود را وارد کنید.
+            </p>
+
+            <button id="login-music-button" type="button">
+                ♪ پخش موسیقی
+            </button>
+
+            <div id="music-seek-container">
+
+                <div class="music-time-row">
+                    <span id="music-current-time">00:00</span>
+                    <span id="music-duration">00:00</span>
+                </div>
+
+                <input
+                    type="range"
+                    id="music-seekbar"
+                    min="0"
+                    max="100"
+                    value="0"
+                    step="0.1"
+                    aria-label="موقعیت پخش موسیقی">
+
+                <div class="music-controls">
+                    <button type="button" id="music-backward" title="۱۰ ثانیه عقب">
+                        <span>۱۰−</span>
+                        <span>⏪</span>
+                    </button>
+
+                    <span id="music-status">آماده پخش</span>
+
+                    <button type="button" id="music-forward" title="۱۰ ثانیه جلو">
+                        <span>۱۰+</span>
+                        <span>⏩</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <form id="login-form">
+                <div class="field">
+                    <label for="employee-code">کد پرسنلی</label>
+                    <input
+                        id="employee-code"
+                        type="text"
+                        placeholder="کد پرسنلی را وارد کنید"
+                        autocomplete="username"
+                        required>
+                </div>
+
+                <div class="field">
+                    <label for="employee-password">رمز عبور</label>
+                    <input
+                        id="employee-password"
+                        type="password"
+                        placeholder="رمز عبور را وارد کنید"
+                        autocomplete="current-password"
+                        required>
+                </div>
+
+                <button id="login-button" type="submit">
+                    ورود به باشگاه بازی
+                </button>
+
+                <div id="login-error"></div>
+            </form>
+        </div>
+    </div>
+
+    <main id="app">
+        <header>
+            <h1>YAZD TIRE GAME CLUB</h1>
+            <p>باشگاه رقابت و سرگرمی کارکنان یزد تایر</p>
+        </header>
+
+        <div id="employee-info">
+            <span id="employee-name"></span>
+            <button id="logout-button" type="button">خروج</button>
+        </div>
+
+        <div id="game-container"></div>
+
+        <footer>
+            برای پرش، روی صفحه لمس کنید یا کلید Space را فشار دهید.
+        </footer>
+    </main>
+
+    <script>
+        const API_BASE_URL = "http://127.0.0.1:8000";
+        const TOKEN_KEY = "yazd_tire_access_token";
+
+        const loginForm = document.getElementById("login-form");
+        const loginScreen = document.getElementById("login-screen");
+        const loginError = document.getElementById("login-error");
+        const loginButton = document.getElementById("login-button");
+        const employeeInfo = document.getElementById("employee-info");
+        const app = document.getElementById("app");
+        const loginMusic = document.getElementById("login-music");
+        const loginMusicButton = document.getElementById("login-music-button");
+
+        /* =========================================
+           MUSIC SEEK BAR AND CONTROLS
+        ========================================= */
+
+        const musicSeekbar = document.getElementById("music-seekbar");
+        const musicCurrentTime = document.getElementById("music-current-time");
+        const musicDuration = document.getElementById("music-duration");
+        const musicBackward = document.getElementById("music-backward");
+        const musicForward = document.getElementById("music-forward");
+        const musicStatus = document.getElementById("music-status");
+
+        let isSeekingMusic = false;
+
+        function formatMusicTime(seconds) {
+            if (!Number.isFinite(seconds)) return "00:00";
+
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+
+            return String(minutes).padStart(2, "0") + ":" +
+                   String(remainingSeconds).padStart(2, "0");
+        }
+
+        function updateMusicProgress() {
+            if (!Number.isFinite(loginMusic.duration)) return;
+
+            const duration = loginMusic.duration;
+            const current = loginMusic.currentTime;
+
+            musicSeekbar.max = duration;
+            musicCurrentTime.textContent = formatMusicTime(current);
+            musicDuration.textContent = formatMusicTime(duration);
+
+            if (!isSeekingMusic) {
+                musicSeekbar.value = current;
+            }
+        }
+
+        loginMusic.addEventListener("loadedmetadata", function() {
+            updateMusicProgress();
+            musicStatus.textContent = "موسیقی آماده است";
+        });
+
+        loginMusic.addEventListener("timeupdate", function() {
+            updateMusicProgress();
+        });
+
+        musicSeekbar.addEventListener("input", function() {
+            isSeekingMusic = true;
+
+            musicCurrentTime.textContent =
+                formatMusicTime(Number(musicSeekbar.value));
+        });
+
+        musicSeekbar.addEventListener("change", function() {
+            if (Number.isFinite(loginMusic.duration)) {
+                loginMusic.currentTime = Math.min(
+                    Number(musicSeekbar.value),
+                    loginMusic.duration
+                );
+            }
+
+            isSeekingMusic = false;
+            updateMusicProgress();
+        });
+
+        musicBackward.addEventListener("click", function() {
+            if (!Number.isFinite(loginMusic.duration)) return;
+
+            loginMusic.currentTime = Math.max(
+                0,
+                loginMusic.currentTime - 10
+            );
+
+            updateMusicProgress();
+        });
+
+        musicForward.addEventListener("click", function() {
+            if (!Number.isFinite(loginMusic.duration)) return;
+
+            loginMusic.currentTime = Math.min(
+                loginMusic.duration,
+                loginMusic.currentTime + 10
+            );
+
+            updateMusicProgress();
+        });
+
+        loginMusic.addEventListener("play", function() {
+            musicStatus.textContent = "در حال پخش";
+        });
+
+        loginMusic.addEventListener("pause", function() {
+            musicStatus.textContent = "متوقف شده";
+        });
+
+        loginMusic.addEventListener("ended", function() {
+            musicStatus.textContent = "پایان موسیقی";
+        });
+
+
+        /* =========================================
+           AUTOMATIC LOGIN IMAGE SLIDESHOW
+        ========================================= */
+
+        const slideA = document.getElementById("slide-a");
+        const slideB = document.getElementById("slide-b");
+
+        // تصاویر پیش‌فرض در صورت در دسترس نبودن API
+        let slideImages = [
+            "/assets/slide1.png",
+            "/assets/slide2.png",
+            "/assets/slide3.png",
+            "/assets/slide4.png",
+            "/assets/slide5.png"
+        ];
+
+        let currentSlide = 0;
+        let activeLayer = 0;
+
+        let slideshowTimer = null;
+        let imageRefreshTimer = null;
+
+        let slideshowStopped = false;
+        let slideshowInitialized = false;
+        let imageRefreshInProgress = false;
+
+        const SLIDE_DURATION = 5000;
+        const IMAGE_REFRESH_INTERVAL = 30000;
+
+        function preloadSlideImages(images) {
+            images.forEach(function(src) {
+                const image = new Image();
+                image.src = src;
+            });
+        }
+
+        function getActiveSlideElement() {
+            return activeLayer === 0 ? slideA : slideB;
+        }
+
+        function getInactiveSlideElement() {
+            return activeLayer === 0 ? slideB : slideA;
+        }
+
+        async function refreshSlideshowImages() {
+            if (imageRefreshInProgress || slideshowStopped) return;
+
+            imageRefreshInProgress = true;
+
+            try {
+                const response = await fetch(
+                    API_BASE_URL + "/api/slideshow/images",
+                    {
+                        method: "GET",
+                        cache: "no-store",
+                        headers: {
+                            "Accept": "application/json"
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("دریافت تصاویر ناموفق بود");
+                }
+
+                const data = await response.json();
+
+                if (!Array.isArray(data.images)) {
+                    throw new Error("فهرست تصاویر معتبر نیست");
+                }
+
+                // حذف تصویر پس‌زمینه از اسلایدشو
+                const newImages = data.images
+                    .filter(function(fileName) {
+                        const name = String(fileName).toLowerCase();
+
+                        return (
+                            /\.(jpg|jpeg|png|webp)$/i.test(name) &&
+                            name !== "login-bg.png"
+                        );
+                    })
+                    .map(function(fileName) {
+                        return "/assets/slideshow/" +
+                            encodeURIComponent(fileName);
+                    });
+
+                // اگر پوشه خالی بود، تصاویر پیش‌فرض حفظ شوند
+                if (newImages.length === 0) {
+                    return;
+                }
+
+                const oldImages = slideImages.slice();
+
+                slideImages = newImages;
+
+                preloadSlideImages(slideImages);
+
+                if (!slideshowInitialized) {
+                    currentSlide = 0;
+                    activeLayer = 0;
+
+                    slideA.src = slideImages[0];
+                    slideA.classList.add("active");
+
+                    slideB.src = slideImages[1] || slideImages[0];
+                    slideB.classList.remove("active");
+
+                    slideshowInitialized = true;
+
+                    console.log(
+                        "اسلایدشو آماده شد. تعداد تصاویر:",
+                        slideImages.length
+                    );
+
+                    return;
+                }
+
+                // تصویر فعلی تا حد امکان حفظ شود
+                const activeImage = getActiveSlideElement();
+                const inactiveImage = getInactiveSlideElement();
+
+                const currentUrl = activeImage.getAttribute("src");
+
+                let currentIndex = slideImages.indexOf(currentUrl);
+
+                if (currentIndex === -1) {
+                    const currentFileName = decodeURIComponent(
+                        currentUrl.split("/").pop() || ""
+                    );
+
+                    currentIndex = slideImages.findIndex(function(url) {
+                        return decodeURIComponent(
+                            url.split("/").pop() || ""
+                        ) === currentFileName;
+                    });
+                }
+
+                if (currentIndex >= 0) {
+                    currentSlide = currentIndex;
+                } else {
+                    currentSlide = 0;
+
+                    activeImage.src = slideImages[0];
+                    inactiveImage.src =
+                        slideImages[1] || slideImages[0];
+                }
+
+                if (oldImages.length !== slideImages.length) {
+                    console.log(
+                        "فهرست تصاویر به‌روزرسانی شد. تعداد:",
+                        slideImages.length
+                    );
+                }
+
+            } catch (error) {
+                console.warn(
+                    "دریافت تصاویر خودکار انجام نشد؛ تصاویر پیش‌فرض استفاده می‌شوند.",
+                    error
+                );
+
+                if (!slideshowInitialized) {
+                    slideA.src = slideImages[0];
+                    slideB.src = slideImages[1];
+                    slideA.classList.add("active");
+                    slideB.classList.remove("active");
+                    slideshowInitialized = true;
+                }
+
+            } finally {
+                imageRefreshInProgress = false;
+            }
+        }
+
+        function changeSlide() {
+            if (
+                slideshowStopped ||
+                slideImages.length <= 1
+            ) {
+                return;
+            }
+
+            const nextIndex = (currentSlide + 1) % slideImages.length;
+
+            const nextLayer = getInactiveSlideElement();
+            const currentLayer = getActiveSlideElement();
+
+            const nextImage = slideImages[nextIndex];
+
+            const switchImage = function() {
+                if (slideshowStopped) return;
+
+                nextLayer.classList.remove("active");
+
+                requestAnimationFrame(function() {
+                    requestAnimationFrame(function() {
+                        nextLayer.classList.add("active");
+                        currentLayer.classList.remove("active");
+
+                        activeLayer = activeLayer === 0 ? 1 : 0;
+                        currentSlide = nextIndex;
+                    });
+                });
+            };
+
+            // تصویر بعدی ابتدا بارگذاری می‌شود
+            if (nextLayer.getAttribute("src") === nextImage) {
+                switchImage();
+            } else {
+                nextLayer.onload = function() {
+                    nextLayer.onload = null;
+                    nextLayer.onerror = null;
+                    switchImage();
+                };
+
+                nextLayer.onerror = function() {
+                    nextLayer.onload = null;
+                    nextLayer.onerror = null;
+
+                    // در صورت خرابی تصویر، از آن عبور می‌کنیم
+                    currentSlide = nextIndex;
+                };
+
+                nextLayer.src = nextImage;
+            }
+        }
+
+        function startSlideshow() {
+            if (slideshowTimer || slideshowStopped) return;
+
+            slideshowTimer = setInterval(
+                changeSlide,
+                SLIDE_DURATION
+            );
+        }
+
+        function stopSlideshow() {
+            slideshowStopped = true;
+
+            if (slideshowTimer) {
+                clearInterval(slideshowTimer);
+                slideshowTimer = null;
+            }
+
+            if (imageRefreshTimer) {
+                clearInterval(imageRefreshTimer);
+                imageRefreshTimer = null;
+            }
+        }
+
+        async function initializeSlideshow() {
+            await refreshSlideshowImages();
+
+            if (slideshowStopped) return;
+
+            startSlideshow();
+
+            // بررسی تصاویر جدید هر ۳۰ ثانیه
+            imageRefreshTimer = setInterval(
+                refreshSlideshowImages,
+                IMAGE_REFRESH_INTERVAL
+            );
+        }
+
+        initializeSlideshow();
+
+
+        /* =========================================
+           OFFICIAL YAZD TIRE PASSENGER PRODUCTS
+        ========================================= */
+
+        const officialImage = function(fileName) {
+            return "https://yric.com/wp-content/uploads/2025/10/" +
+                fileName + "-1024x1024.webp";
+        };
+
+        const products = [
+            { name: "EARTH", size: "215/60 R17", image: officialImage("Tire-Earth-21560-R17-Front") },
+            { name: "EARTH", size: "225/65 R17", image: officialImage("Tire-Earth-22565-R17-Front") },
+
+            { name: "JUPITER", size: "165/80 R13", image: officialImage("Tire-Jupitetr-16580-R13-Front") },
+
+            { name: "LUNAR", size: "185/60 R15", image: officialImage("Tire-Lunar-18560-R15-Front") },
+
+            { name: "MARS", size: "175/60 R13", image: officialImage("Tire-Mars-17560-R13-Front") },
+            { name: "MARS", size: "185/60 R14", image: officialImage("Tire-Mars-18560-R14-Front") },
+            { name: "MARS", size: "205/50 R16", image: officialImage("Tire-Mars-20550-R16-Front") },
+
+            { name: "MERCURY", size: "185/60 R13", image: officialImage("Tire-Mercury-18560-R13-Back") },
+            { name: "MERCURY", size: "185/65 R14", image: officialImage("Tire-Mercury-18565-R14-Front") },
+            { name: "MERCURY", size: "185/65 R15", image: officialImage("Tire-Mercury-18565-R15-Front") },
+            { name: "MERCURY", size: "195/65 R15", image: officialImage("Tire-Mercury-18565-R15-Front") },
+            { name: "MERCURY", size: "205/60 R14", image: officialImage("Tire-Mercury-20560-R14-Front") },
+            { name: "MERCURY", size: "205/60 R15", image: officialImage("Tire-Mercury-20560-R15-Front") },
+
+            { name: "NEPTUNE", size: "195/60 R15", image: officialImage("Tire-Neptune-19560-R15-Front") },
+            { name: "NEPTUNE", size: "205/55 R16", image: officialImage("Tire-Neptune-20555-R16-Front") },
+            { name: "NEPTUNE", size: "215/55 R17", image: officialImage("Tire-Neptune-21555-R17-Front") },
+            { name: "NEPTUNE", size: "215/60 R16", image: officialImage("Tire-Neptune-21560-R16-Front") },
+
+            { name: "NOVA", size: "185/65 R14", image: officialImage("Tire-Nova-18565-R15-Front") },
+            { name: "NOVA", size: "185/65 R15", image: officialImage("Tire-Nova-18565-R15-Front") },
+            { name: "NOVA", size: "195/60 R15", image: officialImage("Tire-Nova-19560-R15-Front") },
+            { name: "NOVA", size: "205/55 R16", image: officialImage("Tire-Nova-20555-R16-Front") },
+
+            { name: "PLANET", size: "175/70 R13", image: officialImage("Tire-Planet-17570-R13-Front") },
+            { name: "PLANET", size: "185/60 R14", image: officialImage("Tire-Planet-18560-R14-Front") },
+
+            { name: "SATURN", size: "165/65 R13", image: officialImage("Tire-Saturn-16565-R13-Front") },
+
+            { name: "SKY", size: "205/55 R16", image: officialImage("Tire-Sky-20555-R16-Front") },
+            { name: "SKY", size: "215/55 R17", image: officialImage("Tire-Sky-20555-R16-Front") },
+            { name: "SKY", size: "215/60 R16", image: officialImage("Tire-Sky-20555-R16-Front") },
+
+            { name: "SUN", size: "165/65 R13", image: officialImage("Tire-Sun-16565-R13-Front") },
+            { name: "SUN", size: "175/60 R13", image: officialImage("Tire-Sun-16565-R13-Front") },
+
+            { name: "UNIVERSE", size: "225/55 R18", image: officialImage("Tire-Universe-22555-R18-Front") },
+            { name: "UNIVERSE", size: "235/65 R17", image: officialImage("Tire-Universe-23565-R17-Front") },
+
+            { name: "URANUS", size: "175/60 R13", image: officialImage("Tire-Uranus-17560-R13-Front") },
+            { name: "URANUS", size: "185/65 R14", image: officialImage("Tire-Uranus-18565-R14-Front") },
+            { name: "URANUS", size: "185/65 R15", image: officialImage("Tire-Uranus-18565-R14-Front") },
+            { name: "URANUS", size: "195/65 R15", image: officialImage("Tire-Uranus-19565-R15-Front") },
+            { name: "URANUS", size: "205/60 R15", image: officialImage("Tire-Uranus-20560-R15-Front") },
+            { name: "URANUS", size: "215/55 R16", image: officialImage("Tire-Uranus-20560-R15-Front") },
+
+            { name: "VENUS", size: "165/65 R13", image: officialImage("Tire-Venus-16565-R13-Front") },
+            { name: "VENUS", size: "175/70 R13", image: officialImage("Tire-Venus-17570-R13-Front") }
+        ];
+
+        const productImage = document.getElementById("product-image");
+        const tirePlaceholder = document.getElementById("tire-placeholder");
+        const productName = document.getElementById("product-name");
+        const productSize = document.getElementById("product-size");
+        const catalogDots = document.getElementById("catalog-dots");
+
+        let currentProduct = 0;
+        let productTimer = null;
+        let productSlideshowStopped = false;
+
+        products.forEach(function(product) {
+            const dot = document.createElement("span");
+            dot.className = "catalog-dot";
+            catalogDots.appendChild(dot);
+
+            const preload = new Image();
+            preload.src = product.image;
+        });
+
+        function showProduct(index) {
+            if (productSlideshowStopped) return;
+
+            currentProduct = index % products.length;
+            const product = products[currentProduct];
+
+            productName.textContent = product.name;
+            productSize.textContent = product.size;
+
+            productImage.style.display = "block";
+            tirePlaceholder.style.display = "none";
+
+            productImage.onload = function() {
+                productImage.style.display = "block";
+                tirePlaceholder.style.display = "none";
+            };
+
+            productImage.onerror = function() {
+                productImage.style.display = "none";
+                tirePlaceholder.style.display = "flex";
+            };
+
+            productImage.src = product.image;
+
+            Array.from(catalogDots.children).forEach(function(dot, dotIndex) {
+                dot.classList.toggle(
+                    "active",
+                    dotIndex === currentProduct
+                );
+            });
+        }
+
+        function startProductSlideshow() {
+            if (productTimer || productSlideshowStopped) return;
+
+            showProduct(0);
+
+            productTimer = setInterval(function() {
+                showProduct((currentProduct + 1) % products.length);
+            }, 6000);
+        }
+
+        function stopProductSlideshow() {
+            productSlideshowStopped = true;
+
+            if (productTimer) {
+                clearInterval(productTimer);
+                productTimer = null;
+            }
+        }
+
+        startProductSlideshow();
+
+
+        /* =========================================
+           MUSIC PLAYBACK
+        ========================================= */
+
+        loginMusic.volume = 0.28;
+
+        function updateMusicButton(isPlaying) {
+            loginMusicButton.textContent = isPlaying
+                ? "♫ توقف موسیقی"
+                : "♪ پخش موسیقی";
+
+            loginMusicButton.setAttribute(
+                "aria-pressed",
+                String(isPlaying)
+            );
+        }
+
+        async function startLoginMusic() {
+            if (loginScreen.style.display === "none") return;
+
+            try {
+                await loginMusic.play();
+                updateMusicButton(true);
+            } catch (error) {
+                updateMusicButton(false);
+            }
+        }
+
+        function stopLoginMusic() {
+            loginMusic.pause();
+            loginMusic.currentTime = 0;
+            updateMusicButton(false);
+        }
+
+        loginMusicButton.addEventListener("click", async function() {
+            if (loginMusic.paused) {
+                await startLoginMusic();
+            } else {
+                loginMusic.pause();
+                updateMusicButton(false);
+            }
+        });
+
+        window.addEventListener("load", function() {
+            startLoginMusic();
+        }, { once: true });
+
+        document.addEventListener("pointerdown", function(event) {
+            if (event.target.closest("#login-music-button")) return;
+
+            if (
+                loginMusic.paused &&
+                loginScreen.style.display !== "none"
+            ) {
+                startLoginMusic();
+            }
+        });
+
+
+        /* =========================================
+           LOGIN MESSAGES
+        ========================================= */
+
+        function showLoginError(message) {
+            loginError.textContent = message;
+            loginError.style.display = "block";
+        }
+
+        function hideLoginError() {
+            loginError.textContent = "";
+            loginError.style.display = "none";
+        }
+
+
+        /* =========================================
+           SHOW EMPLOYEE
+        ========================================= */
+
+        function showEmployee(employee) {
+            stopLoginMusic();
+            stopSlideshow();
+            stopProductSlideshow();
+
+            const employeeName = document.getElementById("employee-name");
+
+            employeeName.textContent =
+                "خوش آمدید، " + employee.full_name +
+                " | واحد سازمانی: " + employee.department;
+
+            employeeInfo.style.display = "block";
+            loginScreen.style.display = "none";
+
+            document.getElementById("login-slideshow").style.display = "none";
+            document.getElementById("product-showcase").style.display = "none";
+
+            app.style.visibility = "visible";
+
+            window.dispatchEvent(new Event("resize"));
+
+            if (window.game && window.game.scale) {
+                window.game.scale.refresh();
+            }
+        }
+
+
+        /* =========================================
+           GET EMPLOYEE PROFILE
+        ========================================= */
+
+        async function getEmployeeProfile(token) {
+            const response = await fetch(
+                API_BASE_URL + "/api/auth/me",
+                {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json",
+                        "Authorization": "Bearer " + token
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("AUTH_FAILED");
+            }
+
+            return await response.json();
+        }
+
+
+        /* =========================================
+           LOGIN
+        ========================================= */
+
+        loginForm.addEventListener("submit", async function(event) {
+            event.preventDefault();
+            hideLoginError();
+
+            const code = document.getElementById("employee-code").value.trim();
+            const password = document.getElementById("employee-password").value;
+
+            if (!code || !password) {
+                showLoginError(
+                    "لطفاً کد پرسنلی و رمز عبور را وارد کنید."
+                );
+                return;
+            }
+
+            loginButton.disabled = true;
+            loginButton.textContent = "در حال بررسی اطلاعات...";
+
+            try {
+                const response = await fetch(
+                    API_BASE_URL + "/api/auth/login",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json"
+                        },
+                        body: JSON.stringify({
+                            employee_code: code,
+                            password: password
+                        })
+                    }
+                );
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error(
+                            "کد پرسنلی یا رمز عبور اشتباه است."
+                        );
+                    }
+
+                    if (response.status === 403) {
+                        throw new Error(
+                            "حساب کاربری شما غیرفعال است."
+                        );
+                    }
+
+                    throw new Error(
+                        data.detail ||
+                        "ورود انجام نشد. دوباره تلاش کنید."
+                    );
+                }
+
+                if (!data.access_token) {
+                    throw new Error(
+                        "سرور توکن ورود را ارسال نکرد."
+                    );
+                }
+
+                const token = data.access_token;
+                const profile = await getEmployeeProfile(token);
+
+                if (!profile.employee) {
+                    throw new Error(
+                        "اطلاعات کارمند از سرور دریافت نشد."
+                    );
+                }
+
+                sessionStorage.setItem(TOKEN_KEY, token);
+                showEmployee(profile.employee);
+
+            } catch (error) {
+                if (error.message === "Failed to fetch") {
+                    showLoginError(
+                        "ارتباط با سرور برقرار نشد. مطمئن شوید بک‌اند روشن است."
+                    );
+                } else if (error.message === "AUTH_FAILED") {
+                    sessionStorage.removeItem(TOKEN_KEY);
+                    showLoginError(
+                        "نشست کاربری معتبر نیست. دوباره وارد شوید."
+                    );
+                } else {
+                    showLoginError(
+                        error.message ||
+                        "خطایی هنگام ورود رخ داد."
+                    );
+                }
+            } finally {
+                loginButton.disabled = false;
+                loginButton.textContent = "ورود به باشگاه بازی";
+            }
+        });
+
+
+        /* =========================================
+           LOGOUT
+        ========================================= */
+
+        document.getElementById("logout-button").addEventListener(
+            "click",
+            function() {
+                stopLoginMusic();
+                sessionStorage.removeItem(TOKEN_KEY);
+                location.reload();
+            }
+        );
+
+
+        /* =========================================
+           CHECK EXISTING LOGIN
+        ========================================= */
+
+        async function checkExistingLogin() {
+            const token = sessionStorage.getItem(TOKEN_KEY);
+
+            if (!token) return;
+
+            try {
+                const profile = await getEmployeeProfile(token);
+
+                if (profile.employee) {
+                    showEmployee(profile.employee);
+                } else {
+                    sessionStorage.removeItem(TOKEN_KEY);
+                }
+
+            } catch (error) {
+                sessionStorage.removeItem(TOKEN_KEY);
+            }
+        }
+
+        checkExistingLogin();
+
+    </script>
+
+    <script type="module" src="/src/game.js"></script>
+
+</body>
+</html>
